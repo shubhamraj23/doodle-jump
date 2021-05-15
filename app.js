@@ -7,6 +7,7 @@ function startSetup(){
     const distanceUp = 2.4;
     const velocityUp = 4.8;
     window.clickCount = 0;
+    window.score = 0;
 
     // Grid Class
     const gridData = new Grid();
@@ -14,6 +15,8 @@ function startSetup(){
     // Remove the button
     var button = document.getElementsByClassName('start-button')[0];
     button.style.display = 'none';
+    var scoreArea = document.getElementsByClassName('result')[0];
+    scoreArea.style.display = 'none';
 
     // Create all the platforms
     platforms = [];
@@ -27,6 +30,11 @@ function startSetup(){
     // Make the doodler fall down
     doodler.initiateFall(platformData);
 
+    // Start moving the platforms
+    setInterval(function(){
+        platformData.movePlatforms(doodler, gridData);
+    }, 10);
+
     // Add the effect of keys
     document.addEventListener('keyup', function(event){
         doodler.control(event);
@@ -34,6 +42,11 @@ function startSetup(){
     document.addEventListener('click', function(event){
         doodler.click(event);
     })
+
+    // Set the high score
+    if(localStorage.getItem("highScore") == null){
+        localStorage.setItem("highScore", 0);
+    }
 }
 
 
@@ -52,6 +65,30 @@ function createPlatforms(gridData, numberOfPlatforms, platforms){
     return platformposition;
 }
 
+function displayEnd(){
+    var grid = document.getElementsByClassName('grid')[0];
+    while (grid.firstChild){
+        grid.removeChild(grid.firstChild);
+    }
+
+    // Show the button
+    var button = document.getElementsByClassName('start-button')[0];
+    var text = document.getElementById('button-text');
+    text.innerHTML = 'Start Again';
+    button.style.display = 'block';
+
+    // Display Score
+    var scoreArea = document.getElementsByClassName('result')[0];
+    var score = document.getElementById('score');
+    var highScore = document.getElementById('high-score');
+    score.innerHTML = 'Score: ' + window.score;
+    if(window.score > localStorage.getItem("highScore")){
+        localStorage.setItem("highScore", window.score);
+    }
+    highScore.innerHTML = 'Highest Score: ' + localStorage.getItem("highScore");
+    scoreArea.style.display = "block";
+    window.clickCount = 0;
+}
 
 // All the useful classes go here
 
@@ -103,6 +140,36 @@ class PlatformData{
             this.platforms[i].left = Math.random() * (gridData.gridWidth - this.platformWidth);
             platformVisual.style.left = this.platforms[i].left + 'px';
         }
+    }
+
+    movePlatforms(doodler, gridData){
+        if(doodler.bottomGap >= 1.5*this.platformGap){
+            this.platforms.forEach(platform => {
+                platform.bottom -= gridData.gridHeight/400;
+                let visual = platform.visual;
+                visual.style.bottom = platform.bottom + 'px';
+
+                if (platform.bottom <= 10){
+                    let firstPlatform = this.platforms[0].visual;
+                    firstPlatform.classList.remove('platform');
+                    this.platforms.shift();
+                    window.score += 1;
+
+                    var bottomGap = this.platforms[this.platforms.length -1].bottom + this.platformGap;
+                    let newPlatform = new Platform(bottomGap, gridData)
+                    this.platforms.push(newPlatform);
+                    this.alignNewPlatform(this.platforms[this.platforms.length - 1], gridData);
+                }
+            });
+        }
+    }
+
+    alignNewPlatform(platform, gridData){
+        var platformVisual = platform.visual;
+        platformVisual.style.width = this.platformWidth + 'px';
+        platformVisual.style.height = this.platformHeight + 'px';
+        platform.left = Math.random() * (gridData.gridWidth - this.platformWidth);
+        platformVisual.style.left = platform.left + 'px';
     }
 }
 
@@ -168,6 +235,10 @@ class Doodler{
                     this.initiateJump(platformData, this.bottomGap);
                 }
             });
+
+            if(this.bottomGap <= 0){
+                this.gameOver();
+            }
         }, 10);
     }
 
@@ -269,5 +340,14 @@ class Doodler{
         this.movingRight = false;
         clearInterval(this.leftTimer);
         clearInterval(this.rightTimer);
+    }
+
+    gameOver(){
+        clearInterval(this.upTimer);
+        clearInterval(this.downTimer);
+        clearInterval(this.leftTimer);
+        clearInterval(this.rightTimer);
+        window.clickCount = 0;
+        displayEnd();
     }
 }

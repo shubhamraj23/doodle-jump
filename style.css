@@ -18,6 +18,19 @@ button{
     width: 60%;
 }
 
+.result{
+    background-color: black;
+    border-radius: 10px;
+    color: white;
+    display: none;
+    font-size: 2vh;
+    left: 30vw;
+    position: fixed;
+    text-align: center;
+    top: 10vh;
+    width: 40%;
+}
+
 .grid{
     background-image: url('background.png');
     height: calc(100vh - 16px);
