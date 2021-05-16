@@ -11,24 +11,33 @@ button{
     width: 40vw;
 }
 
-.start-button{
-    left: 30vw;
+.difficulty{
+    display: none;
+    flex-direction: row;
+    left: 20vw;
     position: fixed;
     top: 45vh;
     width: 60%;
 }
 
-.result{
-    background-color: black;
-    border-radius: 10px;
-    color: white;
+.difficulty-button{
+    width: 33%;
+}
+
+.difficulty-text{
     display: none;
     font-size: 2vh;
-    left: 30vw;
     position: fixed;
-    text-align: center;
-    top: 10vh;
-    width: 40%;
+    top: 35vh;
+}
+
+.doodler{
+    background-image: url('doodler.png');
+    background-size: cover;
+    height: 87px;
+    position: absolute;
+    width: 85px;
+    z-index: 1;
 }
 
 .grid{
@@ -47,11 +56,43 @@ button{
     width: 85px;
 }
 
-.doodler{
-    background-image: url('doodler.png');
-    background-size: cover;
-    height: 87px;
-    position: absolute;
-    width: 85px;
-    z-index: 1;
+.result{
+    background-color: black;
+    border-radius: 10px;
+    color: white;
+    display: none;
+    font-size: 2vh;
+    left: 30vw;
+    position: fixed;
+    text-align: center;
+    top: 10vh;
+    width: 40%;
+}
+
+.score-text{
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.start-button{
+    left: 30vw;
+    position: fixed;
+    top: 45vh;
+    width: 60%;
+}
+
+#button-easy{
+    background-color: green;
+}
+
+#button-medium{
+    background-color: greenyellow;
+}
+
+#button-hard{
+    background-color: red;
+}
+
+#high-score{
+    margin-top: 20px;
 }

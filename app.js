@@ -1,32 +1,74 @@
-// This function creates all the classes contaning the global variables
-// It also initialises the grid loading process
-function startSetup(){
-    // All the modifiable variables go first
-    if(screen.width >= screen.height){
-        var numberOfPlatforms = 5;
-    }
-    else{
-        var numberOfPlatforms = 7;
-    }
-    const accelerationUp = 4.8;
-    const distanceUp = 2.4;
-    const velocityUp = 4.8;
-    window.clickCount = 0;
-    window.score = 0;
-
-    // Grid Class
-    const gridData = new Grid();
-    
+// This function starts the game and asks for the difficulty level
+function chooseDifficulty(){
     // Remove the button
     var button = document.getElementsByClassName('start-button')[0];
     button.style.display = 'none';
     var scoreArea = document.getElementsByClassName('result')[0];
     scoreArea.style.display = 'none';
 
+    // Show the difficulty
+    var difficulty = document.getElementsByClassName('difficulty')[0];
+    var text = document.getElementsByClassName('difficulty-text')[0];
+    text.style.display = 'block';
+    var textWidth = text.offsetWidth/2;
+    text.style.left = "calc(50vw - " + textWidth + "px)"
+    difficulty.style.display = "flex";
+}
+
+// This function creates all the classes contaning the global variables
+// It also initialises the grid loading process
+function startSetup(level){
+    // Remove the existing items
+    var difficulty = document.getElementsByClassName('difficulty')[0];
+    var text = document.getElementsByClassName('difficulty-text')[0];
+    text.style.display = 'none';
+    difficulty.style.display = "none";
+
+    // All the variables dependent on input go first
+    if(level === 'easy'){
+        if(screen.width >= screen.height){
+            var numberOfPlatforms = 6;
+        }
+        else{
+            var numberOfPlatforms = 8;
+        }
+        var platformMove = 2.3;
+        var platformSpeed = 1;
+    }
+    else if (level === 'medium'){
+        if(screen.width >= screen.height){
+            var numberOfPlatforms = 5;
+        }
+        else{
+            var numberOfPlatforms = 7;
+        }
+        var platformMove = 1.5;
+        var platformSpeed = 1;
+    }
+    else{
+        if(screen.width >= screen.height){
+            var numberOfPlatforms = 4;
+        }
+        else{
+            var numberOfPlatforms = 5;
+        }
+        var platformMove = 1;
+        var platformSpeed = 1.5;
+    }
+    var accelerationUp = 4.8;
+    var distanceUp = 2.4;
+    var velocityUp = 4.8;
+    window.clickCount = 0;
+    window.score = 0;
+    window.level = level;
+
+    // Grid Class
+    const gridData = new Grid();
+
     // Create all the platforms
     platforms = [];
     platformposition = createPlatforms(gridData, numberOfPlatforms, platforms);
-    var platformData = new PlatformData(platforms, gridData, platformposition);
+    var platformData = new PlatformData(platforms, gridData, platformposition, platformMove, platformSpeed);
     platformData.alignPlatforms(gridData);
 
     // Create doodler
@@ -48,10 +90,15 @@ function startSetup(){
         doodler.click(event);
     });
     
-
     // Set the high score
-    if(localStorage.getItem("highScore") == null){
-        localStorage.setItem("highScore", 0);
+    if(localStorage.getItem("easy") == null){
+        localStorage.setItem("easy", 0);
+    }
+    if(localStorage.getItem("medium") == null){
+        localStorage.setItem("medium", 0);
+    }
+    if(localStorage.getItem("hard") == null){
+        localStorage.setItem("hard", 0);
     }
 }
 
@@ -85,14 +132,21 @@ function displayEnd(){
 
     // Display Score
     var scoreArea = document.getElementsByClassName('result')[0];
+    var level = document.getElementById('level');
     var score = document.getElementById('score');
-    var highScore = document.getElementById('high-score');
+    var highScoreEasy = document.getElementById('high-score-easy');
+    var highScoreMedium = document.getElementById('high-score-medium');
+    var highScoreHard = document.getElementById('high-score-hard');
     score.innerHTML = 'Score: ' + window.score;
-    if(window.score > localStorage.getItem("highScore")){
-        localStorage.setItem("highScore", window.score);
+    level.innerHTML = 'Level: ' + window.level.charAt(0).toUpperCase() + window.level.slice(1);
+    if(window.score > localStorage.getItem(window.level)){
+        localStorage.setItem(window.level, window.score);
     }
-    highScore.innerHTML = 'Highest Score: ' + localStorage.getItem("highScore");
+    highScoreEasy.innerHTML = 'Easy: ' + localStorage.getItem("easy");
+    highScoreMedium.innerHTML = 'Medium: ' + localStorage.getItem("medium");
+    highScoreHard.innerHTML = 'Hard: ' + localStorage.getItem("hard");
     scoreArea.style.display = "block";
+
     window.clickCount = 0;
     document.removeEventListener('click', clickMove);
 }
@@ -124,10 +178,12 @@ class Platform{
 
 // PlatformData Class containing all the info of all the classes
 class PlatformData{
-    constructor(platforms, gridData, platformposition){
+    constructor(platforms, gridData, platformposition, platformMove, platformSpeed){
         this.platforms = platforms;
         this.platformGap = platformposition[0];
         this.initialPlatformBottomGap = platformposition[1];
+        this.platformMove = platformMove;
+        this.platformSpeed = platformSpeed;
         var platform = document.getElementsByClassName('platform')[0];
         if(platform.offsetWidth >= gridData.gridWidth/8){
             this.platformWidth = platform.offsetWidth;
@@ -150,9 +206,9 @@ class PlatformData{
     }
 
     movePlatforms(doodler, gridData){
-        if(doodler.bottomGap >= 1.5*this.platformGap){
+        if(doodler.bottomGap >= this.platformMove*this.platformGap){
             this.platforms.forEach(platform => {
-                platform.bottom -= gridData.gridHeight/400;
+                platform.bottom -= this.platformSpeed*gridData.gridHeight/400;
                 let visual = platform.visual;
                 visual.style.bottom = platform.bottom + 'px';
 
