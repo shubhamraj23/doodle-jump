@@ -2,7 +2,12 @@
 // It also initialises the grid loading process
 function startSetup(){
     // All the modifiable variables go first
-    var numberOfPlatforms = 5;
+    if(screen.width >= screen.height){
+        var numberOfPlatforms = 5;
+    }
+    else{
+        var numberOfPlatforms = 7;
+    }
     const accelerationUp = 4.8;
     const distanceUp = 2.4;
     const velocityUp = 4.8;
@@ -39,9 +44,10 @@ function startSetup(){
     document.addEventListener('keyup', function(event){
         doodler.control(event);
     });
-    document.addEventListener('click', function(event){
+    document.addEventListener('click', clickMove = function(event){
         doodler.click(event);
-    })
+    });
+    
 
     // Set the high score
     if(localStorage.getItem("highScore") == null){
@@ -88,6 +94,7 @@ function displayEnd(){
     highScore.innerHTML = 'Highest Score: ' + localStorage.getItem("highScore");
     scoreArea.style.display = "block";
     window.clickCount = 0;
+    document.removeEventListener('click', clickMove);
 }
 
 // All the useful classes go here
@@ -284,10 +291,10 @@ class Doodler{
         var body = document.getElementsByTagName('body')[0];
         var bodyWidth = body.offsetWidth;
         var clickLocation = event.clientX - 8;
-        if(clickLocation < 2*bodyWidth/5){
+        if(clickLocation < bodyWidth/2){
             this.moveLeft();
         }
-        else if (clickLocation > 3*bodyWidth/5){
+        else if (clickLocation > bodyWidth/2){
             this.moveRight();
         }
         else{
